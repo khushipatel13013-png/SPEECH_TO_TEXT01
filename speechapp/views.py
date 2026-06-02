@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from openai import OpenAI
 from groq import Groq
+from .models import SpeechHistory
 
 client = OpenAI(
     api_key="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",
@@ -42,6 +43,11 @@ Text: {text}
         )
 
         corrected = response.choices[0].message.content
+        SpeechHistory.objects.create(
+    user=request.user,
+    original_text=text,
+    corrected_text=corrected
+)
 
     return render(request, 'home.html', {
         'corrected': corrected,
