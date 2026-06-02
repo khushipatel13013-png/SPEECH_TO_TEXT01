@@ -43,8 +43,9 @@ Text: {text}
         )
 
         corrected = response.choices[0].message.content
+
         SpeechHistory.objects.create(
-    user=request.user,
+     user=request.user,
     original_text=text,
     corrected_text=corrected
 )
