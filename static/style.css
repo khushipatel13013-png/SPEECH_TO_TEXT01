@@ -162,7 +162,7 @@ textarea{
 }
 
 .chatbot-panel{
-    width:320px;
+    width:420px;
     background:white;
     border-radius:20px;
     padding:20px;
@@ -338,4 +338,11 @@ textarea{
     text-decoration:none;
 
     font-weight:bold;
+}
+.bot-message pre{
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: Consolas;
+    font-size:14px;
+    overflow-x:auto;
 }

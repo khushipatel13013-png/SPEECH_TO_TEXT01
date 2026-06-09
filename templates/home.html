@@ -75,6 +75,7 @@
 </p>
 
         <form method="POST" action="/correct/">
+            
 
             {% csrf_token %}
 
@@ -173,10 +174,10 @@ style="text-decoration:none; display:inline-block;">
     {{ chat.user }}
 </div>
 
-<div class="bot-message">
-    {{ chat.bot }}
-</div>
 
+<div class="bot-text">
+    {{ chat.bot|linebreaks }}
+</div>
 {% endfor %}
 
     </div>
