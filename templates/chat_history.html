@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat History</title>
+</head>
+
+<body>
+
+<h1>🤖 Chat History</h1>
+
+<form method="GET" style="margin-bottom:20px;">
+
+    <input
+        type="text"
+        name="search"
+        placeholder="🔍 Search chats..."
+        value="{{ request.GET.search }}"
+        style="
+            width:1200px;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:16px;
+        "
+    >
+
+    <button
+        type="submit"
+        style="
+            padding:12px 20px;
+            border:none;
+            background:#2563eb;
+            color:white;
+            border-radius:8px;
+            cursor:pointer;
+        "
+    >
+        Search
+    </button>
+
+</form>
+
+{% for record in records %}
+
+<p>
+<b>You:</b>
+{{ record.user_message }}
+</p>
+
+<p>
+<b>AI:</b>
+{{ record.bot_reply }}
+</p>
+
+<p>
+{{ record.created_at }}
+</p>
+
+<a href="/delete-chat/{{ record.id }}/">
+❌ Delete
+</a>
+
+<hr>
+
+{% empty %}
+
+<p>No chat history found.</p>
+
+{% endfor %}
+
+</body>
+</html>

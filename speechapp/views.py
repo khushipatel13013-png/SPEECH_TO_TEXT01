@@ -8,6 +8,7 @@ from openai import OpenAI
 from groq import Groq
 from .models import SpeechHistory
 from .models import SpeechHistory, ChatHistory
+import PyPDF2
 
 
 client = OpenAI(
@@ -47,8 +48,9 @@ Text: {text}
         )
 
         corrected = response.choices[0].message.content
+        request.session["pdf_text"] = text
 
-        SpeechHistory.objects.create(
+        SpeechHistory.objects.get_or_create(
             user=request.user,
             original_text=text,
             corrected_text=corrected
@@ -143,10 +145,20 @@ Rules:
         request.session["chat_history"] = chat_history
 
     return render(request, "home.html", {
-        "chat_history": request.session["chat_history"]
-    })
+    "chat_history": request.session["chat_history"],
+    "original_text": request.session.get("pdf_text", "")
+})
+
 def home(request):
-    return render(request, "home.html")
+
+    return render(
+        request,
+        "home.html",
+        {
+            "original_text": request.session.get("pdf_text", ""),
+            "chat_history": request.session.get("chat_history", [])
+        }
+    )
 
 def login_user(request):
 
@@ -236,3 +248,113 @@ def download_pdf(request):
     p.save()
 
     return response
+
+
+def history_page(request):
+
+    search = request.GET.get('search')
+
+    records = SpeechHistory.objects.filter(
+        user=request.user
+    )
+
+    if search:
+
+        records = records.filter(
+            original_text__icontains=search
+        )
+
+    records = records.order_by('-created_at')
+
+    return render(
+        request,
+        'history.html',
+        {
+            'records': records
+        }
+    )
+
+
+def delete_history(request, id):
+
+    record = SpeechHistory.objects.get(
+        id=id,
+        user=request.user
+    )
+
+    record.delete()
+
+    return redirect('/history/')
+
+def chat_history_page(request):
+
+    search = request.GET.get('search')
+
+    records = ChatHistory.objects.filter(
+        user=request.user
+    )
+
+    if search:
+
+        records = records.filter(
+            user_message__icontains=search
+        )
+
+    records = records.order_by('-created_at')
+
+    return render(
+        request,
+        'chat_history.html',
+        {
+            'records': records
+        }
+    )
+
+def delete_chat(request, id):
+
+    record = ChatHistory.objects.get(
+        id=id,
+        user=request.user
+    )
+
+    record.delete()
+
+    return redirect('/chat-history/')
+
+def upload_pdf(request):
+
+    print("VIEW CALLED")
+
+    extracted_text = ""
+
+    if request.method == "POST":
+
+        print("POST RECEIVED")
+
+        pdf_file = request.FILES.get("pdf_file")
+
+        print(pdf_file)
+
+        if pdf_file:
+
+            reader = PyPDF2.PdfReader(pdf_file)
+
+            for page in reader.pages:
+
+                text = page.extract_text()
+
+                print(text)
+
+                extracted_text += text + "\n"
+                request.session["pdf_text"] = extracted_text
+
+                return render(
+    request,
+    "home.html",
+    {
+        "original_text": request.session.get("pdf_text", ""),
+        "chat_history": request.session.get("chat_history", [])
+    }
+)
+
+    

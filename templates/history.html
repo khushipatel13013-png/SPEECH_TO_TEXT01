@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Speech History</title>
+</head>
+
+<body>
+
+<h1>Speech History</h1>
+
+    <form method="GET" style="margin-bottom:20px;">
+
+    <input
+        type="text"
+        name="search"
+        placeholder="🔍 Search history..."
+        value="{{ request.GET.search }}"
+        style="
+            width:1200px;
+            padding:12px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:16px;
+        "
+    >
+
+    <button
+        type="submit"
+        style="
+            padding:12px 20px;
+            border:none;
+            background:#2563eb;
+            color:white;
+            border-radius:8px;
+            cursor:pointer;
+        "
+    >
+        Search
+    </button>
+
+</form>
+    
+
+{% for record in records %}
+
+<p>
+<b>Original:</b>
+{{ record.original_text }}
+</p>
+
+<p>
+<b>Corrected:</b>
+{{ record.corrected_text }}
+</p>
+
+<p>
+{{ record.created_at }}
+</p>
+
+<a href="/delete-history/{{ record.id }}/">
+    ❌ Delete
+</a>
+
+<hr>
+
+{% endfor %}
+
+</body>
+</html>

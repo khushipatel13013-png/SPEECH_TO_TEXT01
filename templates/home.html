@@ -42,6 +42,16 @@
 {% if user.is_authenticated %}
 
 <li>
+    <a href="/history/" class="menu-link">
+        📜 Speech History
+    </a>
+</li>
+<li>
+    <a href="/chat-history/" class="menu-link">
+        🤖 Chat History
+    </a>
+</li>
+<li>
     <a href="/logout/" class="menu-link">
         🚪 Logout
     </a>
@@ -73,6 +83,23 @@
         <p id="status" style="margin-bottom:15px; color:#2563eb;">
     Click Start to Speak
 </p>
+
+
+ <form method="POST"
+      action="/upload-pdf/"
+      enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    <input type="file" name="pdf_file">
+
+    <button type="submit">
+        📂 Upload PDF
+    </button>
+
+</form>
+
+<br>
 
         <form method="POST" action="/correct/">
             
@@ -119,6 +146,7 @@
         <div class="result-card">
 
     <div class="result-header">
+
 
         <h2>✨ Corrected Text</h2>
 
