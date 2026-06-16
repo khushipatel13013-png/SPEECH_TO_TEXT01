@@ -8,7 +8,7 @@
 
 <title>VoiceScript AI</title>
 {% load static %}
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
@@ -78,6 +78,17 @@
 <div class="content">
 
     <div class="speech-box">
+       
+
+
+
+
+
+
+
+
+
+
 
         <h1>🎤 Speech To Text</h1>
         <p id="status" style="margin-bottom:15px; color:#2563eb;">
@@ -92,10 +103,9 @@
     {% csrf_token %}
 
     <input type="file" name="pdf_file">
-
-    <button type="submit">
-        📂 Upload PDF
-    </button>
+    <button type="submit" class="upload-btn">
+    📂 Upload PDF
+</button>
 
 </form>
 
@@ -183,6 +193,40 @@ style="text-decoration:none; display:inline-block;">
     </div>
 
 </div>
+
+
+
+
+
+ <div class="stats-container">
+
+    <div class="stat-card">
+        <h3>🎤 Speeches</h3>
+        <h1>{{ total_speeches }}</h1>
+    </div>
+
+    <div class="stat-card">
+        <h3>🤖 Chats</h3>
+        <h1>{{ total_chats }}</h1>
+    </div>
+
+    <div class="stat-card">
+        <h3>📄 PDFs</h3>
+        <h1>{{ total_pdfs }}</h1>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
     </div>
 
  <div class="chatbot-panel">
@@ -233,6 +277,13 @@ style="text-decoration:none; display:inline-block;">
 
 </div>
 </div>
+
+
+
+
+
+
+
 
 <script>
 

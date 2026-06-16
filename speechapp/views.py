@@ -11,6 +11,7 @@ from .models import SpeechHistory, ChatHistory
 import PyPDF2
 
 
+
 client = OpenAI(
     api_key="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",
     base_url="https://api.groq.com/openai/v1"
@@ -151,12 +152,24 @@ Rules:
 
 def home(request):
 
+    total_speeches = SpeechHistory.objects.filter(
+        user=request.user
+    ).count()
+
+    total_chats = ChatHistory.objects.filter(
+        user=request.user
+    ).count()
+
     return render(
         request,
         "home.html",
         {
             "original_text": request.session.get("pdf_text", ""),
-            "chat_history": request.session.get("chat_history", [])
+            "chat_history": request.session.get("chat_history", []),
+
+            "total_speeches": total_speeches,
+            "total_chats": total_chats,
+            "total_pdfs": 0,
         }
     )
 
@@ -356,5 +369,3 @@ def upload_pdf(request):
         "chat_history": request.session.get("chat_history", [])
     }
 )
-
-    
