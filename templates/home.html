@@ -2,375 +2,355 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>VoiceScript AI</title>
-{% load static %}
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>VoiceScript AI</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
 <body>
 
-<div class="main-container">
+    <div class="main-container">
+        <!-- SIDEBAR START -->
+        <div class="sidebar">
+            <h2>
+                <h2>
+                    <span style="color:#3b82f6;">VoiceScript</span>
+                    <span style="color:white;">AI</span>
+                </h2>
 
-    <div class="sidebar">
+                {% if user.is_authenticated %}
 
-        <h2>🎤 VoiceScript AI</h2>
+                <div class="profile-card">
 
-        {% if user.is_authenticated %}
+                    <div class="avatar">
+                        👤
+                    </div>
 
-<p style="margin-top:15px; color:#9ca3af;">
+                    <h3>{{ user.username }}</h3>
 
-    Welcome,
-    {{ user.username }}
+                </div>
 
-</p>
+                {% endif %}
 
-{% endif %}
+                <ul class="menu">
+                    <li class="active-menu">
+                        <a href="/" class="menu-link">
+                            🏠 Dashboard
+                        </a>
+                    </li>
 
-    <ul class="menu">
+                    {% if user.is_authenticated %}
 
-    <li class="active-menu">
-    <a href="/" class="menu-link">
-        🏠 Dashboard
-    </a>
-</li>
+                    <li>
+                        <a href="/history/" class="menu-link">
+                            📜 Speech History
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/chat-history/" class="menu-link">
+                            🤖 Chat History
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout/" class="menu-link">
+                            🚪 Logout
+                        </a>
+                    </li>
 
-{% if user.is_authenticated %}
+                    {% else %}
+                    <li class="active-menu">
+                        <a href="/login/" class="menu-link">
+                            🔐 Login
+                        </a>
+                    </li>
 
-<li>
-    <a href="/history/" class="menu-link">
-        📜 Speech History
-    </a>
-</li>
-<li>
-    <a href="/chat-history/" class="menu-link">
-        🤖 Chat History
-    </a>
-</li>
-<li>
-    <a href="/logout/" class="menu-link">
-        🚪 Logout
-    </a>
-</li>
+                    <li>
+                        <a href="/register/" class="menu-link">
+                            📝 Signup
+                        </a>
+                    </li>
 
-{% else %}
-<li class="active-menu">
-    <a href="/login/" class="menu-link">
-        🔐 Login
-    </a>
-</li>
+                    {% endif %}
 
-<li>
-    <a href="/register/" class="menu-link">
-        📝 Signup
-    </a>
-</li>
+                </ul>
+        </div>
+        <!-- SIDEBAR END -->
 
-{% endif %}
+        <!-- CONTENT START -->
+        <div class="content">
+            <!-- STATS START -->
+            <div class="stats-container">
+                <div class="stat-card">
 
-</ul>
-    </div>
+                    <div class="icon">🎤</div>
 
-<div class="content">
+                    <div>
 
-    <div class="speech-box">
-       
+                        <h4>Total Speeches</h4>
 
+                        <h2>{{total_speeches}}</h2>
 
+                    </div>
 
+                </div>
 
+                <div class="stat-card">
 
+                    <div class="icon">
+                        💬
+                    </div>
 
+                    <div class="stat-info">
+                        <h4>Total Chats</h4>
+                        <h2>{{ total_chats }}</h2>
+                    </div>
 
+                </div>
+                <div class="stat-card">
 
+                    <div class="icon">
+                        📄
+                    </div>
 
+                    <div class="stat-info">
+                        <h4>PDF Files</h4>
+                        <h2>{{ total_pdfs }}</h2>
 
+                    </div>
 
-        <h1>🎤 Speech To Text</h1>
-        <p id="status" style="margin-bottom:15px; color:#2563eb;">
-    Click Start to Speak
-</p>
-
-
- <form method="POST"
-      action="/upload-pdf/"
-      enctype="multipart/form-data">
-
-    {% csrf_token %}
-
-    <input type="file" name="pdf_file">
-    <button type="submit" class="upload-btn">
-    📂 Upload PDF
-</button>
-
-</form>
-
-<br>
-
-        <form method="POST" action="/correct/">
-            
-
-            {% csrf_token %}
-
-            <textarea
-            id="output"
-            name="text"
-            placeholder="Start speaking...">{{ original_text }}</textarea>
-
-            <div class="buttons">
-
-                <button
-                type="button"
-                class="start-btn"
-                onclick="startSpeech()">
-
-                🎙 Start
-
-                </button>
-
-                <button
-                type="button"
-                class="stop-btn"
-                onclick="stopSpeech()">
-
-                ⏹ Stop
-
-                </button>
-
-                <button
-                type="submit"
-                class="grammar-btn">
-
-                ✨ Correct Grammar
-
-                </button>
+                </div>
 
             </div>
+            <!-- STATS END -->
 
-        </form>
+            <!-- MAIN DASHBOARD START -->
+            <div class="main-dashboard">
 
-        <div class="result-card">
+                <!-- LEFT SIDE -->
+                <div class="speech-box">
+                    <h1>🎤 Speech To Text</h1>
+                    <p id="status" style="margin-bottom:15px; color:#2563eb;">
+                        Click Start to Speak
+                    </p>
 
-    <div class="result-header">
+                    <div class="upload-card">
+
+                        <div class="upload-left">
+
+                            <h3>📄 Upload PDF</h3>
+
+                            <p>
+                                Upload PDF to summarize with AI.
+                            </p>
+
+                        </div>
+
+                        <form method="POST" action="/upload-pdf/" enctype="multipart/form-data">
+
+                            {% csrf_token %}
+
+                            <input type="file" name="pdf_file">
+
+                            <button type="submit" class="upload-btn">
+
+                                📂 Upload PDF
+
+                            </button>
+
+                        </form>
+
+                    </div>
+                    <br>
+                    <form method="POST" action="/correct/">
+
+                        {% csrf_token %}
+
+                        <div class="dual-text-area">
+
+                            <!-- ORIGINAL TEXT -->
+                            <div class="text-panel">
+
+                                <h3>Original Text</h3>
+
+                                <textarea id="output" name="text"
+                                    placeholder="Start speaking...">{{ original_text }}</textarea>
+
+                            </div>
+
+                            <!-- CORRECTED TEXT -->
+                            <div class="text-panel">
+
+                                <div class="panel-header">
+
+                                    <h3>Corrected Text</h3>
+
+                                    <div class="result-buttons">
+
+                                        <button type="button" class="copy-btn" onclick="copyText()">
+
+                                            📄 Copy
+
+                                        </button>
+                                        <button type="button" class="clear-btn"
+                                            onclick="document.getElementById('output').value=''">
+
+                                            🗑 Clear
+
+                                        </button>
+
+                                        <a href="/download-pdf/?text={{ corrected }}" class="pdf-btn"
+                                            style="text-decoration:none; display:inline-block;">
+
+                                            📥 PDF
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="corrected-text" id="corrected-text">
+
+                                    {{ corrected }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ACTION BUTTONS -->
+
+                        <div class="buttons">
+
+                            <button type="button" class="start-btn" onclick="startSpeech()">
+
+                                🎙 Start
+
+                            </button>
+
+                            <button type="button" class="stop-btn" onclick="stopSpeech()">
+
+                                ⏹ Stop
+
+                            </button>
+
+                            <button type="submit" class="grammar-btn">
+
+                                ✨ Correct Grammar
+
+                            </button>
+
+                        </div>
+
+                    </form>
 
 
-        <h2>✨ Corrected Text</h2>
+                </div>
+                <!-- SPEECH-BOX END -->
 
-        <div class="result-buttons">
+                <!-- RIGHT SIDE -->
+                <div class="chatbot-panel">
 
-            <button
-            class="copy-btn"
-            onclick="copyText()">
+                    <h2>🤖 AI Assistant</h2>
 
-            📄 Copy
+                    <div class="chat-messages">
 
-            </button>
+                        <div class="bot-message">
+                            Hello 👋<br>
+                            How can I help you today?
+                        </div>
 
-           <a
-href="/download-pdf/?text={{ corrected }}"
-class="pdf-btn"
-style="text-decoration:none; display:inline-block;">
+                        {% for chat in chat_history %}
 
-📥 PDF
+                        <div class="user-message">
+                            {{ chat.user }}
+                        </div>
 
-</a>
+                        <div class="bot-text">
+                            {{ chat.bot|linebreaks }}
+                        </div>
 
+                        {% endfor %}
 
+                    </div>
+
+                    <form method="POST" action="/chatbot/">
+
+                        {% csrf_token %}
+
+                        <div class="chat-input-box">
+                            <input type="text" name="message" placeholder="Ask anything...">
+                            <button type="submit">
+                                ➤
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!-- CHATBOT-PANEL END -->
+            </div>
+            <!-- MAIN-DASHBOARD END -->
         </div>
-
+        <!-- CONTENT END -->
     </div>
-
-    <div
-    class="corrected-text"
-    id="corrected-text">
-
-        {{ corrected }}
-
-    </div>
-
-</div>
-
-
-
-
-
- <div class="stats-container">
-
-    <div class="stat-card">
-        <h3>🎤 Speeches</h3>
-        <h1>{{ total_speeches }}</h1>
-    </div>
-
-    <div class="stat-card">
-        <h3>🤖 Chats</h3>
-        <h1>{{ total_chats }}</h1>
-    </div>
-
-    <div class="stat-card">
-        <h3>📄 PDFs</h3>
-        <h1>{{ total_pdfs }}</h1>
-    </div>
-
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    </div>
-
- <div class="chatbot-panel">
-
-    <h2>🤖 AI Assistant</h2>
-
-    <div class="chat-messages">
-
-        <div class="bot-message">
-            Hello 👋<br>
-            How can I help you today?
-        </div>
-
-        {% for chat in chat_history %}
-
-<div class="user-message">
-    {{ chat.user }}
-</div>
-
-
-<div class="bot-text">
-    {{ chat.bot|linebreaks }}
-</div>
-{% endfor %}
-
-    </div>
-
-    <form method="POST" action="/chatbot/">
-
-        {% csrf_token %}
-
-        <div class="chat-input-box">
-
-            <input
-            type="text"
-            name="message"
-            placeholder="Ask anything...">
-
-            <button type="submit">
-
-                ➤
-
-            </button>
-
-        </div>
-
-    </form>
-
-</div>
-</div>
-
-
-
-
-
-
-
-
-<script>
-
-var recognition;
-var isListening = false;
-
-function startSpeech(){
-    document.getElementById("status").innerHTML = "🎤 Listening...";
-
-
-    recognition = new webkitSpeechRecognition();
-
-    recognition.lang = "en-US";
-
-    recognition.continuous = true;
-
-    recognition.interimResults = false;
-
-    isListening = true;
-
-    recognition.onresult = function(event){
-
-        var finalText = "";
-
-        for(
-            var i = event.resultIndex;
-            i < event.results.length;
-            i++
-        ){
-
-            finalText += event.results[i][0].transcript;
-
-        }
-
-        document.getElementById("output").value +=
-        finalText + " ";
-
-    };
-
-    recognition.onend = function(){
-
-        if(isListening){
-
+    <!-- MAIN-CONTAINER END -->
+
+    <script>
+        var recognition;
+        var isListening = false;
+        function startSpeech() {
+            document.getElementById("status").innerHTML = "🎤 Listening...";
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = "en-US";
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            isListening = true;
+
+            recognition.onresult = function (event) {
+                var finalText = "";
+                for (
+                    var i = event.resultIndex;
+                    i < event.results.length;
+                    i++
+                ) {
+                    finalText += event.results[i][0].transcript;
+                }
+                document.getElementById("output").value +=
+                    finalText + " ";
+            };
+
+            recognition.onend = function () {
+                if (isListening) {
+                    recognition.start();
+                }
+            };
             recognition.start();
-
         }
+        function stopSpeech() {
+            document.getElementById("status").innerHTML = "⏹ Recording Stopped";
+            isListening = false;
+            recognition.stop();
+        }
+        function copyText() {
+            let text =
+                document.getElementById("corrected-text").innerText;
+            navigator.clipboard.writeText(text);
+            alert("Copied!");
+        }
+    </script>
 
-    };
-
-    recognition.start();
-
-}
-
-function stopSpeech(){
-    document.getElementById("status").innerHTML = "⏹ Recording Stopped";
-
-    isListening = false;
-
-    recognition.stop();
-
-}
-
-function copyText(){
-
-    let text =
-    document.getElementById("corrected-text").innerText;
-
-    navigator.clipboard.writeText(text);
-
-    alert("Copied!");
-
-}
-
-</script>
-<script>
-
-window.onload = function(){
-
-    var chatBox =
-    document.querySelector(".chat-messages");
-
-    chatBox.scrollTop =
-    chatBox.scrollHeight;
-
-};
-
-</script>
+    <script>
+        window.onload = function () {
+            var chatBox =
+                document.querySelector(".chat-messages");
+            chatBox.scrollTop =
+                chatBox.scrollHeight;
+        };
+    </script>
 </body>
 
 </html>

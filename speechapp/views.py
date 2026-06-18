@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
@@ -8,19 +9,17 @@ from openai import OpenAI
 from groq import Groq
 from .models import SpeechHistory
 from .models import SpeechHistory, ChatHistory
+from django.contrib.auth.decorators import login_required 
 import PyPDF2
-
-
 
 client = OpenAI(
     api_key="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",
-    base_url="https://api.groq.com/openai/v1"
+    base_url="https://api.groq.com/openai/v1",
 )
 
-client = Groq(
-    api_key="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"
-)
+client = Groq(api_key="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")
 
+@login_required(login_url="/login/")
 def correct_text(request):
 
     corrected = ""
@@ -31,39 +30,37 @@ def correct_text(request):
         text = request.POST.get("text", "").strip()
 
         response = client.chat.completions.create(
-
             model="llama-3.1-8b-instant",
-
             messages=[
                 {
                     "role": "user",
-
                     "content": f"""
 Correct the grammar and punctuation of the following text.
 Return only corrected text.
 
 Text: {text}
-"""
+""",
                 }
-            ]
+            ],
         )
 
         corrected = response.choices[0].message.content
         request.session["pdf_text"] = text
 
         SpeechHistory.objects.get_or_create(
-            user=request.user,
-            original_text=text,
-            corrected_text=corrected
+            user=request.user, original_text=text, corrected_text=corrected
+        )
+        return render(
+            request,
+            "home.html",
+            {
+                "corrected": corrected,
+                "original_text": text,
+                "chat_history": request.session.get("chat_history", []),
+            },
         )
     
-    return render(request, 'home.html', {
-    'corrected': corrected,
-    'original_text': text,
-    'chat_history': request.session.get("chat_history", [])
-    })
-
-
+@login_required(login_url="/login/")
 def chatbot(request):
 
     if "chat_history" not in request.session:
@@ -77,9 +74,8 @@ def chatbot(request):
 
         messages = [
             {
-    "role": "system",
-
-    "content": """
+                "role": "system",
+                "content": """
 
 You are VoiceScript AI Assistant.
 
@@ -98,67 +94,52 @@ Rules:
   - Separate HTML/CSS/JS/Python properly
   - Use clean formatting
 
-"""
-}
-
+""",
+            }
         ]
 
         recent_chats = chat_history[-5:]
 
         for chat in recent_chats:
 
-            messages.append({
-                "role": "user",
-                "content": chat["user"]
-            })
+            messages.append({"role": "user", "content": chat["user"]})
 
-            messages.append({
-                "role": "assistant",
-                "content": chat["bot"]
-            })
+            messages.append({"role": "assistant", "content": chat["bot"]})
 
-        messages.append({
-            "role": "user",
-            "content": message
-        })
+        messages.append({"role": "user", "content": message})
 
         response = client.chat.completions.create(
-
-            model="llama-3.3-70b-versatile",
-
-            messages=messages
-
+            model="llama-3.3-70b-versatile", messages=messages
         )
 
         answer = response.choices[0].message.content
 
-        chat_history.append({
-            "user": message,
-            "bot": answer
-        })
+        chat_history.append({"user": message, "bot": answer})
 
         ChatHistory.objects.create(
-        user=request.user,
-        user_message=message,
-        bot_reply=answer
+            user=request.user, user_message=message, bot_reply=answer
         )
 
         request.session["chat_history"] = chat_history
 
-    return render(request, "home.html", {
-    "chat_history": request.session["chat_history"],
-    "original_text": request.session.get("pdf_text", "")
-})
+    return render(
+        request,
+        "home.html",
+        {
+            "chat_history": request.session["chat_history"],
+            "original_text": request.session.get("pdf_text", ""),
+        },
+    )
 
+@login_required(login_url="/login/")
 def home(request):
 
-    total_speeches = SpeechHistory.objects.filter(
-        user=request.user
-    ).count()
+    if not request.user.is_authenticated:
+        return redirect("/login/")
 
-    total_chats = ChatHistory.objects.filter(
-        user=request.user
-    ).count()
+    total_speeches = SpeechHistory.objects.filter(user=request.user).count()
+
+    total_chats = ChatHistory.objects.filter(user=request.user).count()
 
     return render(
         request,
@@ -166,31 +147,27 @@ def home(request):
         {
             "original_text": request.session.get("pdf_text", ""),
             "chat_history": request.session.get("chat_history", []),
-
             "total_speeches": total_speeches,
             "total_chats": total_chats,
             "total_pdfs": 0,
-        }
+        },
     )
+
 
 def login_user(request):
 
     if request.method == "POST":
 
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST["username"]
+        password = request.POST["password"]
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
 
             auth_login(request, user)
 
-            return redirect('/')
+            return redirect("/")
 
     return render(request, "login.html")
 
@@ -198,33 +175,31 @@ def register_user(request):
 
     if request.method == "POST":
 
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
+        username = request.POST["username"]
+        email = request.POST["email"]
+        password = request.POST["password"]
 
-        User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
+        User.objects.create_user(username=username, email=email, password=password)
 
-        return redirect('/login/')
+        return redirect("/login/")
 
     return render(request, "register.html")
 
+@login_required(login_url="/login/")
 def logout_user(request):
 
     logout(request)
 
-    return redirect('/login/')
+    return redirect("/login/")
 
+@login_required(login_url="/login/")
 def download_pdf(request):
 
-    text = request.GET.get('text')
+    text = request.GET.get("text")
 
-    response = HttpResponse(content_type='application/pdf')
+    response = HttpResponse(content_type="application/pdf")
 
-    response['Content-Disposition'] = 'attachment; filename="corrected_text.pdf"'
+    response["Content-Disposition"] = 'attachment; filename="corrected_text.pdf"'
 
     p = canvas.Canvas(response)
 
@@ -262,78 +237,55 @@ def download_pdf(request):
 
     return response
 
-
+@login_required(login_url="/login/")
 def history_page(request):
 
-    search = request.GET.get('search')
+    search = request.GET.get("search")
 
-    records = SpeechHistory.objects.filter(
-        user=request.user
-    )
+    records = SpeechHistory.objects.filter(user=request.user)
 
     if search:
 
-        records = records.filter(
-            original_text__icontains=search
-        )
+        records = records.filter(original_text__icontains=search)
 
-    records = records.order_by('-created_at')
+    records = records.order_by("-created_at")
 
-    return render(
-        request,
-        'history.html',
-        {
-            'records': records
-        }
-    )
+    return render(request, "history.html", {"records": records})
 
-
+@login_required(login_url="/login/")
 def delete_history(request, id):
 
-    record = SpeechHistory.objects.get(
-        id=id,
-        user=request.user
-    )
+    record = SpeechHistory.objects.get(id=id, user=request.user)
 
     record.delete()
 
-    return redirect('/history/')
+    return redirect("/history/")
 
+@login_required(login_url="/login/")
 def chat_history_page(request):
 
-    search = request.GET.get('search')
+    search = request.GET.get("search")
 
-    records = ChatHistory.objects.filter(
-        user=request.user
-    )
+    records = ChatHistory.objects.filter(user=request.user)
 
     if search:
 
-        records = records.filter(
-            user_message__icontains=search
-        )
+        records = records.filter(user_message__icontains=search)
 
-    records = records.order_by('-created_at')
+    records = records.order_by("-created_at")
 
-    return render(
-        request,
-        'chat_history.html',
-        {
-            'records': records
-        }
-    )
+    return render(request, "chat_history.html", {"records": records})
 
+@login_required(login_url="/login/")
 def delete_chat(request, id):
 
-    record = ChatHistory.objects.get(
-        id=id,
-        user=request.user
-    )
+    record = ChatHistory.objects.get(id=id, user=request.user)
 
     record.delete()
 
-    return redirect('/chat-history/')
+    return redirect("/chat-history/")
 
+@login_required(login_url="/login/")
 def upload_pdf(request):
 
     print("VIEW CALLED")
@@ -362,10 +314,10 @@ def upload_pdf(request):
                 request.session["pdf_text"] = extracted_text
 
                 return render(
-    request,
-    "home.html",
-    {
-        "original_text": request.session.get("pdf_text", ""),
-        "chat_history": request.session.get("chat_history", [])
-    }
-)
+                    request,
+                    "home.html",
+                    {
+                        "original_text": request.session.get("pdf_text", ""),
+                        "chat_history": request.session.get("chat_history", []),
+                    },
+                )
