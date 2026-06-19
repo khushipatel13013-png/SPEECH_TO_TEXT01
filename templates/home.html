@@ -183,35 +183,8 @@
 
                             <!-- CORRECTED TEXT -->
                             <div class="text-panel">
+                                <h3>Corrected Text</h3>
 
-                                <div class="panel-header">
-
-                                    <h3>Corrected Text</h3>
-
-                                    <div class="result-buttons">
-
-                                        <button type="button" class="copy-btn" onclick="copyText()">
-
-                                            📄 Copy
-
-                                        </button>
-                                        <button type="button" class="clear-btn"
-                                            onclick="document.getElementById('output').value=''">
-
-                                            🗑 Clear
-
-                                        </button>
-
-                                        <a href="/download-pdf/?text={{ corrected }}" class="pdf-btn"
-                                            style="text-decoration:none; display:inline-block;">
-
-                                            📥 PDF
-
-                                        </a>
-
-                                    </div>
-
-                                </div>
 
                                 <div class="corrected-text" id="corrected-text">
 
@@ -223,27 +196,36 @@
 
                         </div>
 
-                        <!-- ACTION BUTTONS -->
+                        <div class="bottom-actions">
 
-                        <div class="buttons">
+                            <div class="left-actions">
 
-                            <button type="button" class="start-btn" onclick="startSpeech()">
+                                <button type="button" class="start-btn" onclick="startSpeech()">
+                                    🎙 Start
+                                </button>
 
-                                🎙 Start
+                                <button type="button" class="stop-btn" onclick="stopSpeech()">
+                                    ⏹ Stop
+                                </button>
 
-                            </button>
+                                <button type="submit" class="grammar-btn">
+                                    ✨ Correct Grammar
+                                </button>
 
-                            <button type="button" class="stop-btn" onclick="stopSpeech()">
+                            </div>
 
-                                ⏹ Stop
+                            <div class="right-actions">
 
-                            </button>
+                                <button type="button" class="copy-btn" onclick="copyText()">
+                                    📄 Copy
+                                </button>
 
-                            <button type="submit" class="grammar-btn">
+                                <a href="/download-pdf/?text={{ corrected }}" class="pdf-btn"
+                                    style="text-decoration:none; display:inline-block;">
+                                    📥 PDF
+                                </a>
 
-                                ✨ Correct Grammar
-
-                            </button>
+                            </div>
 
                         </div>
 
